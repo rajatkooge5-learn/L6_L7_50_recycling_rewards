@@ -1,15 +1,59 @@
+import math
+
 def parse_collection(text):
-    material, kg = text.split(':')
-    return material.strip().title(), float(kg)
+    if not isinstance(text, str):
+        return None
+    try:
+        parts = text.split(':')
+        if len(parts) != 2:
+            return None
+        material = parts[0].strip()
+        if not material:
+            return None
+        kg_str = parts[1].strip()
+        if not kg_str:
+            return None
+        kg = float(kg_str)
+        if math.isnan(kg) or math.isinf(kg) or kg < 0:
+            return None
+        return material.title(), kg
+    except (ValueError, TypeError):
+        return None
 
 def weight_average(weights_csv):
-    values = [int(r) for r in weights_csv.split(',')]
-    return sum(values) // len(values)
+    if not isinstance(weights_csv, str):
+        return 0
+    try:
+        parts = [r.strip() for r in weights_csv.split(',') if r.strip()]
+        if not parts:
+            return 0
+        values = []
+        for r in parts:
+            values.append(int(r))
+        if not values:
+            return 0
+        return sum(values) // len(values)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return 0
 
 def net_points(text):
-    points, penalty = text.split('|')
-    total = float(points) * 2 - float(penalty)
-    return max(total, 0)
+    if not isinstance(text, str):
+        return 0.0
+    try:
+        parts = text.split('|')
+        if len(parts) != 2:
+            return 0.0
+        points_str, penalty_str = parts[0].strip(), parts[1].strip()
+        if not points_str or not penalty_str:
+            return 0.0
+        points = float(points_str)
+        penalty = float(penalty_str)
+        if math.isnan(points) or math.isnan(penalty) or math.isinf(points) or math.isinf(penalty):
+            return 0.0
+        total = points * 2 - penalty
+        return max(total, 0.0)
+    except (ValueError, TypeError):
+        return 0.0
 
 def main():
     print("==== Running parse_collection ====")
